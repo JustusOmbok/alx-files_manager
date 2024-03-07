@@ -1,11 +1,13 @@
 0. Redis utils
+
 mandatory
+
 Inside the folder utils, create a file redis.js that contains the class RedisClient.
 
 RedisClient should have:
 
-the constructor that creates a client to Redis:
-any error of the redis client must be displayed in the console (you should use on('error') of the redis client)
+the constructor that creates a client to Redis:\n
+any error of the redis client must be displayed in the console (you should use on('error') of the redis client)\n
 a function isAlive that returns true when the connection to Redis is a success otherwise, false
 an asynchronous function get that takes a string key as argument and returns the Redis value stored for this key
 an asynchronous function set that takes a string key, a value and a duration in second as arguments to store it in Redis (with an expiration set by the duration argument)
@@ -13,7 +15,9 @@ an asynchronous function del that takes a string key as argument and remove the 
 After the class definition, create and export an instance of RedisClient called redisClient.
 
 1. MongoDB utils
+
 mandatory
+
 Inside the folder utils, create a file db.js that contains the class DBClient.
 
 DBClient should have:
@@ -29,6 +33,7 @@ After the class definition, create and export an instance of DBClient called dbC
 
 
 2. First API
+
 Inside server.js, create the Express server:
 
 it should listen on the port set by the environment variable PORT or by default 5000
@@ -46,6 +51,7 @@ files collection must be used for counting all files
 
 
 3. Create a new user
+
 Now that we have a simple API, it’s time to add users to our database.
 
 In the file routes/index.js, add a new endpoint:
@@ -67,6 +73,7 @@ password: SHA1 value of the value received
 
 
 4. Authenticate a user
+
 In the file routes/index.js, add 3 new endpoints:
 
 GET /connect => AuthController.getConnect
@@ -102,6 +109,7 @@ Otherwise, return the user object (email and id only)
 
 
 5. First file
+
 In the file routes/index.js, add a new endpoint:
 
 POST /files => FilesController.postUpload
@@ -142,7 +150,9 @@ Return the new file with a status code 201
 
 
 6. Get and list file
+
 mandatory
+
 In the file routes/index.js, add 2 new endpoints:
 
 GET /files/:id => FilesController.getShow
@@ -170,7 +180,9 @@ Pagination can be done directly by the aggregate of MongoDB
 
 
 7. File publish/unpublish
+
 mandatory
+
 In the file routes/index.js, add 2 new endpoints:
 
 PUT /files/:id/publish => FilesController.putPublish
@@ -196,7 +208,9 @@ And return the file document with a status code 200
 
 
 8. File data
+
 mandatory
+
 In the file routes/index.js, add one new endpoint:
 
 GET /files/:id/data => FilesController.getFile
@@ -214,7 +228,9 @@ Return the content of the file with the correct MIME-type
 
 
 9. Image Thumbnails
+
 mandatory
+
 Update the endpoint POST /files endpoint to start a background processing for generating thumbnails for a file of type image:
 
 Create a Bull queue fileQueue
@@ -255,7 +271,9 @@ GET /files/:id/data
 
 
 11. New user - welcome email
+
 #advanced
+
 Update the endpoint POST /users endpoint to start a background processing for sending a “Welcome email” to the user:
 
 Create a Bull queue userQueue
