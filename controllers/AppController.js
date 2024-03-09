@@ -1,13 +1,13 @@
 import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
+import redisClientInstance from '../utils/redis'; // Renamed the import
 
 const AppController = {
   async getStatus(req, res) {
-    const redisStatus = redisClient.isAlive();
+    const redisStatus = redisClientInstance.isAlive(); // Used the renamed import
     const dbStatus = dbClient.isAlive();
     const status = {
       redis: redisStatus,
-      db: dbStatus
+      db: dbStatus,
     };
     return res.status(200).json(status);
   },
@@ -17,10 +17,10 @@ const AppController = {
     const filesCount = await dbClient.nbFiles();
     const stats = {
       users: usersCount,
-      files: filesCount
+      files: filesCount,
     };
     return res.status(200).json(stats);
-  }
+  },
 };
 
 export default AppController;
