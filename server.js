@@ -3,6 +3,9 @@ import routes from './routes';
 
 const app = express();
 
+// Parse JSON request bodies
+app.use(express.json());
+
 // Load routes
 app.use('/', routes);
 
