@@ -1,5 +1,6 @@
+import sha1 from 'sha1';
+import redisClientInstance from '../utils/redis';
 import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
 
 const UsersController = {
   async postNew(req, res) {
@@ -39,15 +40,15 @@ const UsersController = {
   },
 
   async getMe(req, res) {
-    const { 'x-token': token } = req.headers;
+    const token = req.headers['x-token'];
 
     if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: 'Unauthorized - No token provided' });
     }
 
-    const userId = await redisClient.get(`auth_${token}`);
+    const userId = await redisClientInstance.get(`auth_${token}`);
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: 'Unauthorized - Invalid token' });
     }
 
     const user = await dbClient.client
@@ -56,11 +57,11 @@ const UsersController = {
       .findOne({ _id: userId });
 
     if (!user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: 'Unauthorized - User not found' });
     }
 
     return res.status(200).json({ id: user._id, email: user.email });
-  }
+  },
 };
 
 export default UsersController;
