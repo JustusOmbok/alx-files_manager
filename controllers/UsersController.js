@@ -1,5 +1,7 @@
+/* eslint-disable import/no-named-as-default */
+import { ObjectId } from 'mongodb';
 import sha1 from 'sha1';
-import redisClientInstance from '../utils/redis';
+import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
 const UsersController = {
@@ -40,24 +42,23 @@ const UsersController = {
   },
 
   async getMe(req, res) {
-    const token = req.headers['x-token'];
-
+    const { 'x-token': token } = req.headers;
     if (!token) {
-      return res.status(401).json({ error: 'Unauthorized - No token provided' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const userId = await redisClientInstance.get(`auth_${token}`);
+    const userId = await redisClient.get(`auth_${token}`);
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized - Invalid token' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const user = await dbClient.client
       .db()
       .collection('users')
-      .findOne({ _id: userId });
+      .findOne({ _id: ObjectId(userId) });
 
     if (!user) {
-      return res.status(401).json({ error: 'Unauthorized - User not found' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     return res.status(200).json({ id: user._id, email: user.email });
