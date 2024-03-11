@@ -2,6 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
+import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
@@ -39,7 +40,7 @@ const FilesController = {
       const parentFile = await dbClient.client
         .db()
         .collection('files')
-        .findOne({ _id: parentId });
+        .findOne({ _id: ObjectId(parentId) });
 
       if (!parentFile) {
         return res.status(400).json({ error: 'Parent not found' });
@@ -85,6 +86,67 @@ const FilesController = {
       isPublic,
       parentId,
     });
+  },
+
+  async getShow(req, res) {
+    const { 'x-token': token } = req.headers;
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const fileId = req.params.id;
+
+    try {
+      const file = await dbClient.client
+        .db()
+        .collection('files')
+        .findOne({ _id: ObjectId(fileId), userId });
+
+      if (!file) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      return res.json(file);
+    } catch (error) {
+      console.error('Error retrieving file:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
+  async getIndex(req, res) {
+    const { 'x-token': token } = req.headers;
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const userId = await redisClient.get(`auth_${token}`);
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { parentId = 0, page = 0 } = req.query;
+    const limit = 20;
+    const skip = parseInt(page) * limit;
+
+    try {
+      const files = await dbClient.client
+        .db()
+        .collection('files')
+        .find({ parentId, userId })
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+
+      return res.json(files);
+    } catch (error) {
+      console.error('Error retrieving files:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
   },
 };
 
