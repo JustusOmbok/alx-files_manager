@@ -131,7 +131,7 @@ const FilesController = {
 
     const { parentId = 0, page = 0 } = req.query;
     const limit = 20;
-    const skip = parseInt(page) * limit;
+    const skip = parseInt(page, 10) * limit;
 
     try {
       const files = await dbClient.client
