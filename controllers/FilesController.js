@@ -4,10 +4,12 @@ import fs from 'fs';
 import path from 'path';
 import mimeTypes from 'mime-types';
 import { ObjectId } from 'mongodb';
+import Bull from 'bull';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
 const FOLDER_PATH = process.env.FOLDER_PATH || '/tmp/files_manager';
+const fileQueue = new Bull('fileQueue');
 
 const FilesController = {
   async postUpload(req, res) {
@@ -63,6 +65,11 @@ const FilesController = {
 
       const fileContent = Buffer.from(data, 'base64');
       fs.writeFileSync(localPath, fileContent);
+
+      // Add a job to the queue for generating thumbnails
+      if (type === 'image') {
+        fileQueue.add({ userId, fileId: fileUUID });
+      }
     }
 
     const newFile = {
@@ -263,7 +270,7 @@ const FilesController = {
 
       // Set headers and send file content
       res.setHeader('Content-Type', mimeType);
-      res.send(fileContent);
+      return res.send(fileContent);
     } catch (error) {
       console.error('Error getting file:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
