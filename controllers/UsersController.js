@@ -1,8 +1,11 @@
 /* eslint-disable import/no-named-as-default */
+import Bull from 'bull';
 import { ObjectId } from 'mongodb';
 import sha1 from 'sha1';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
+
+const userQueue = new Bull('userQueue');
 
 const UsersController = {
   async postNew(req, res) {
@@ -33,6 +36,9 @@ const UsersController = {
         .db()
         .collection('users')
         .insertOne({ email, password: hashedPassword });
+
+      // Add a job to the queue for sending a welcome email
+      userQueue.add({ userId: newUser.insertedId });
 
       return res.status(201).json({ id: newUser.insertedId, email });
     } catch (error) {

@@ -37,3 +37,29 @@ fileQueue.process(async (job) => {
 
   return 'Thumbnails generated successfully';
 });
+
+const userQueue = new Bull('userQueue');
+
+userQueue.process(async (job) => {
+  const { userId } = job.data;
+
+  // Check if userId is present
+  if (!userId) {
+    throw new Error('Missing userId');
+  }
+
+  // Check if user exists in DB
+  const user = await dbClient.client
+    .db()
+    .collection('users')
+    .findOne({ _id: userId });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Print welcome message
+  console.log(`Welcome ${user.email}!`);
+
+  return 'Welcome email sent successfully';
+});
