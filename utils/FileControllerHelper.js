@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default */
 import { ObjectId } from 'mongodb';
 import fs from 'fs';
 import Queue from 'bull';
@@ -24,8 +25,11 @@ class FileControllerHelper {
     if (!user) return null;
 
     // Find user in the database using the user ID from Redis
-    const userCollection = dbClient.db.collection('users');
-    const dbUser = await userCollection.findOne({ _id: ObjectId(user) });
+    const dbUser = await dbClient.client
+      .db()
+      .collection('users')
+      .findOne({ _id: ObjectId(user) });
+
     if (!dbUser) return null;
     return dbUser;
   }
